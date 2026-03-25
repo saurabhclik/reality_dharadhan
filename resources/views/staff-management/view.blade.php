@@ -145,7 +145,7 @@
                                                     <div>
                                                         <span class="fw-bold">{{ $user->name }}</span>
                                                         @if($user->unique_id)
-                                                            <span class="badge bg-danger unique-id-badge">{{ $user->unique_id }}</span>
+                                                            <span class="badge bg-danger unique-id-badge">Associated Partner Unique Id: <span class="text-success   ">{{ $user->unique_id }}</span></span>
                                                         @endif
                                                     </div>
                                                 </div>

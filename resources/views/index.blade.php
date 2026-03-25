@@ -82,6 +82,9 @@
             - ($leadStats->booked ?? 0)
             - ($leadStats->completed ?? 0)
             - ($leadStats->cancelled ?? 0);
+            $userType = Session::get('user_type');
+            $isBaUser = $userType === 'ba';
+            $currentUserId = Session::get('user_id');
     @endphp
     <style>
         .refresh-btn 
@@ -133,7 +136,7 @@
         
         .floating-calendar-header 
         {
-            background: #CF5D3B;
+            background: #3762b8;
             color: white;
             padding: 15px;
             border-radius: 10px 10px 0 0;
@@ -216,7 +219,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background:#CF5D3B;
+            background:#3762b8;
             color: white;
             border: none;
             box-shadow: 0 4px 12px rgba(78, 84, 200, 0.4);
@@ -261,7 +264,7 @@
         
         .ui-datepicker .ui-state-active 
         {
-            background: #CF5D3B !important;
+            background: #3762b8 !important;
             color: white !important;
         }
         
@@ -295,7 +298,7 @@
         }
         .calendar-header 
         {
-            color: #CF5D3B;
+            color: #3762b8;
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
@@ -306,7 +309,7 @@
         {
             background: rgba(255,255,255,0.2);
             border: none;
-            color: #CF5D3B;
+            color: #3762b8;
             width: 34px;
             height: 0px;
             border-radius: 50%;
@@ -380,7 +383,7 @@
         {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(55, 98, 184, 0.2);
-            border-color: #CF5D3B;
+            border-color: #3762b8;
             z-index: 10;
         }
 
@@ -393,9 +396,9 @@
 
         .calendar-day.today 
         {
-            background: #CF5D3B;
+            background: #3762b8;
             color: #ffffff;
-            border-color: #CF5D3B;
+            border-color: #3762b8;
             font-weight: 600;
             box-shadow: 0 2px 8px rgba(55, 98, 184, 0.3);
         }
@@ -403,7 +406,7 @@
         .calendar-day.has-events:not(.empty) 
         {
             background: #e8f0fe;
-            border-color: #CF5D3B;
+            border-color: #3762b8;
         }
 
         .calendar-day.has-missed:not(.empty) 
@@ -420,7 +423,7 @@
             border-radius: 12px;
             margin-top: 2px;
             font-weight: 600;
-            color: #CF5D3B;
+            color: #3762b8;
         }
 
         .calendar-day.has-missed .event-count 
@@ -523,7 +526,7 @@
         .day-event-item 
         {
             padding: 4px 6px; 
-            border-left: 1.5px solid #CF5D3B; 
+            border-left: 1.5px solid #3762b8; 
             background: #f8f9fa;
             font-size: 9px;
             border-radius: 6px;

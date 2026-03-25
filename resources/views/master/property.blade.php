@@ -64,7 +64,7 @@
                                 <tbody>
                                     @foreach($properties as $property)
                                         @php
-                                            $isOwner = $property->user_id == $userId;
+                                            $isOwner = $property->user_id == $userId ||  $userRole === 'super_admin';
                                             $isPublic = $property->property_status == 'Active';
                                             $canView = $isOwner || $isPublic;
                                         @endphp
