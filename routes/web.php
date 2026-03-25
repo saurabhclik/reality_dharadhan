@@ -514,7 +514,8 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
     Route::post('/properties/store', [MasterController::class, 'store_property'])->name('property.store');
     Route::put('/properties/{id}', [MasterController::class, 'update_property'])->name('property.update');
 
-    Route::prefix('agent-links')->group(function () {
+    Route::prefix('agent-links')->group(function () 
+    {
         Route::get('/create', [AgentLinkController::class, 'create'])->name('agent-links.create');
         Route::post('/', [AgentLinkController::class, 'store'])->name('agent-links.store');
         Route::get('/{id}', [AgentLinkController::class, 'show'])->name('agent-links.show');

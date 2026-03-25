@@ -1121,6 +1121,8 @@ class MasterController extends Controller
         {
             $childIds = Session::get('child_ids', []);
             $userId = Session::get('user_id');
+            $userRole = Session::get('user_type');
+            // echo '<pre>'; print_r($userRole); exit;
             if (is_string($childIds)) 
             {
                 $childIds = array_map('intval', explode(',', $childIds));
@@ -1158,7 +1160,7 @@ class MasterController extends Controller
             $categoryList = DB::table('category')->select('id', 'name')->get();
             $invCatg = DB::table('inv_catg')->select('id', 'type', 'name')->get();
 
-            return view('master.property', compact('properties', 'categoryList', 'invCatg', 'userId'));
+            return view('master.property', compact('properties', 'categoryList', 'invCatg', 'userId', 'userRole'));
         } 
         catch (\Exception $e) 
         {

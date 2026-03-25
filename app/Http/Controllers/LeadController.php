@@ -2573,6 +2573,7 @@ class LeadController extends Controller
 
     public function getMatchingProperties($id, Request $request)
     {
+        // echo '<pre>'; print_r($id); exit;
         try 
         {
             $lead = DB::table('leads')->where('id', $id)->first();
@@ -2594,13 +2595,15 @@ class LeadController extends Controller
                 ->where('property_status', '!=', 'Hold');
             if (Schema::hasColumn('properties', 'user_id')) 
             {
-                $query->where(function ($q) use ($userId) 
+                // echo '<pre>'; print_r($id); exit;
+                $query->where(function ($q) use ($userId, $id) 
                 {
                     $q->where('user_id', $userId)
-                    ->orWhereIn('id', function ($subQuery) 
+                    ->orWhereIn('id', function ($subQuery) use ($id)
                     {
                         $subQuery->select('property_id')
                                 ->from('lead_assignments')
+                                ->where('lead_id', $id)
                                 ->where('status', 'active');
                     });
                 });
@@ -2631,7 +2634,7 @@ class LeadController extends Controller
                     'message' => 'No matching properties found for your account'
                 ]);
             }
-
+            // echo '<pre>'; print_r($matchedProperties); exit;
             return response()->json([
                 'status' => 200,
                 'data' => $matchedProperties,

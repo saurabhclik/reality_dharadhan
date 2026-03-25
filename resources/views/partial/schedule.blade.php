@@ -5,7 +5,7 @@
     }
 
     .nav-tabs .nav-link.active h6 {
-        color: #CF5D3B !important;
+        color: #3762b8 !important;
     }
 
     .no-data {
@@ -237,6 +237,10 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                    $userType = Session::get('user_type');
+                                    $isBaUser = $userType === 'ba';
+                                @endphp
                                 @foreach(['todayCalls','todayVisits','interestedToday','todayWhatsapp','todayMeetings'] as $key)
                                     @if(isset($followups[$key]) && $followups[$key]->isNotEmpty())
                                         @foreach($followups[$key] as $item)
@@ -288,6 +292,10 @@
                                                 $createdDate = \Carbon\Carbon::parse($item->created_at);
                                                 $currentDate = \Carbon\Carbon::now();
                                                 $diff_date_count = $createdDate->diffInDays($currentDate);
+
+                                                $maskedName = $isBaUser ? '********' : $item->name;
+                                                $maskedPhone = $isBaUser ? '**********' : $item->phone;
+                                                $maskedEmail = $isBaUser ? '*****@*****.***' : ($item->email ?? '');
                                             @endphp
                                             <tr>
                                                 {{-- Type --}}
@@ -296,6 +304,7 @@
                                                         <i class="{{ $icon }}"></i> {{ $type }}
                                                     </span>
                                                     <div class="d-flex gap-2 align-items-center">
+                                                        @if(!$isBaUser)
                                                         <a href="tel:{{ $item->phone }}" class="btn btn-xs btn-soft-light" title="Call">
                                                             <i class="fas fa-phone text-primary"></i>
                                                         </a>
@@ -309,6 +318,7 @@
                                                             style="cursor:pointer;">
                                                             <i class="fas fa-thumbtack"></i>
                                                         </div>
+                                                        @endif
                                                         <div class="position-relative d-inline-block text-center">
                                                         @if($diff_date_count > 5)
                                                         <span 
@@ -323,7 +333,7 @@
                                                         <span>
                                                             {{ $item->id }}
                                                         </span>
-                                                        @if($item->is_pinned)
+                                                        @if($item->is_pinned && !$isBaUser)
                                                             <span class="pinned-badge">Pinned</span>
                                                         @endif
                                                         
@@ -338,9 +348,21 @@
                                                 {{-- Lead Details --}}
                                                 <td>
                                                     <div class="d-flex flex-column">
-                                                        <h6 class="mb-0">{{ $item->name }}</h6>
-                                                        <span class="text-muted small">{{ $item->phone }}</span>
+                                                        <h6 class="mb-0 {{ $isBaUser ? 'restricted-access' : '' }}">
+                                                            {{ $maskedName }}
+                                                            @if($isBaUser)
+                                                                <i class="fas fa-lock restricted-icon" data-bs-toggle="tooltip" title="Contact information hidden"></i>
+                                                            @endif
+                                                        </h6>
+                                                        <span class="text-muted small {{ $isBaUser ? 'restricted-access' : '' }}">
+                                                            @if($isBaUser)
+                                                                <span class="blur-content">{{ $maskedPhone }}</span>
+                                                            @else
+                                                                {{ $maskedPhone }}
+                                                            @endif
+                                                        </span>
                                                     </div>
+                                                    @if(!$isBaUser)
                                                     <div class="d-flex">
                                                         <button class="btn btn-xs btn-soft-light" 
                                                             onclick="showStatusUpdateModal({{ $item->id }}, '{{ $item->status }}')"
@@ -351,12 +373,13 @@
                                                             <i class="fas fa-edit text-warning"></i>
                                                         </a>
                                                     </div>
+                                                    @endif
                                                 </td>
 
-                                                <td>{{ $item->agent_name }}</td>
-                                                <td>{{ $item->source }}</td>
-                                                <td>{{ $item->campaign }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($item->datetime)->format('M d, Y h:i A') }}</td>
+                                                <td>{{ $item->agent_name ?? '-' }}</td>
+                                                <td>{{ $item->source ?? '-' }}</td>
+                                                <td>{{ $item->campaign ?? '-' }}</td>
+                                                <td>{{ isset($item->datetime) ? \Carbon\Carbon::parse($item->datetime)->format('M d, Y h:i A') : '-' }}</td>
 
                                                 {{-- Status Badge --}}
                                                 <td>
@@ -376,11 +399,12 @@
                                                 </td>
 
                                                 <td>{{ $item->classification ?? '-' }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($item->remind_date)->format('d M Y') }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($item->remind_time)->format('h:i A') }}</td>
+                                                <td>{{ isset($item->remind_date) ? \Carbon\Carbon::parse($item->remind_date)->format('d M Y') : '-' }}</td>
+                                                <td>{{ isset($item->remind_time) ? \Carbon\Carbon::parse($item->remind_time)->format('h:i A') : '-' }}</td>
 
                                                 {{-- Comment --}}
                                                 <td>
+                                                    @if(!$isBaUser)
                                                     <div class="d-flex align-items-center">
                                                         <div class="flex-shrink-0 me-2">
                                                             <i class="fas fa-comment-alt text-muted"></i>
@@ -394,6 +418,10 @@
                                                             </a>
                                                         </div>
                                                     </div>
+                                                    @else
+                                                        <span class="blur-content">{{ $short }}</span>
+                                                        <i class="fas fa-lock restricted-icon" data-bs-toggle="tooltip" title="Comment hidden"></i>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -473,6 +501,10 @@
                                                 $createdDate = \Carbon\Carbon::parse($item->created_at);
                                                 $currentDate = \Carbon\Carbon::now();
                                                 $diff_date_count = $createdDate->diffInDays($currentDate);
+                                                
+                                                $maskedName = $isBaUser ? '********' : $item->name;
+                                                $maskedPhone = $isBaUser ? '**********' : $item->phone;
+                                                $maskedEmail = $isBaUser ? '*****@*****.***' : ($item->email ?? '');
                                             @endphp
                                             <tr>
                                                 {{-- Type --}}
@@ -481,6 +513,7 @@
                                                         <i class="{{ $icon }}"></i> {{ $type }}
                                                     </span>
                                                     <div class="d-flex gap-2 align-items-center">
+                                                        @if(!$isBaUser)
                                                         <a href="tel:{{ $item->phone }}" class="btn btn-xs btn-soft-light" title="Call">
                                                             <i class="fas fa-phone text-primary"></i>
                                                         </a>
@@ -495,6 +528,7 @@
                                                             style="cursor:pointer;">
                                                             <i class="fas fa-thumbtack"></i>
                                                         </div>
+                                                        @endif
 
                                                         <div class="position-relative d-inline-block text-center">
                                                         @if($diff_date_count > 5)
@@ -510,7 +544,7 @@
                                                         <span>
                                                             {{ $item->id }}
                                                         </span>
-                                                        @if($item->is_pinned)
+                                                        @if($item->is_pinned && !$isBaUser)
                                                             <span class="pinned-badge">Pinned</span>
                                                         @endif
                                                         
@@ -525,9 +559,21 @@
                                                 {{-- Lead Details --}}
                                                 <td>
                                                     <div class="d-flex flex-column">
-                                                        <h6 class="mb-0">{{ $item->name }}</h6>
-                                                        <span class="text-muted small">{{ $item->phone }}</span>
+                                                        <h6 class="mb-0 {{ $isBaUser ? 'restricted-access' : '' }}">
+                                                            {{ $maskedName }}
+                                                            @if($isBaUser)
+                                                                <i class="fas fa-lock restricted-icon" data-bs-toggle="tooltip" title="Contact information hidden"></i>
+                                                            @endif
+                                                        </h6>
+                                                        <span class="text-muted small {{ $isBaUser ? 'restricted-access' : '' }}">
+                                                            @if($isBaUser)
+                                                                <span class="blur-content">{{ $maskedPhone }}</span>
+                                                            @else
+                                                                {{ $maskedPhone }}
+                                                            @endif
+                                                        </span>
                                                     </div>
+                                                    @if(!$isBaUser)
                                                     <div class="d-flex">
                                                         <button class="btn btn-xs btn-soft-light" 
                                                             onclick="showStatusUpdateModal({{ $item->id }}, '{{ $item->status }}')"
@@ -538,12 +584,13 @@
                                                             <i class="fas fa-edit text-warning"></i>
                                                         </a>
                                                     </div>
+                                                    @endif
                                                 </td>
 
-                                                <td>{{ $item->agent_name }}</td>
-                                                <td>{{ $item->source }}</td>
-                                                <td>{{ $item->campaign }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($item->datetime)->format('M d, Y h:i A') }}</td>
+                                                <td>{{ $item->agent_name ?? '-' }}</td>
+                                                <td>{{ $item->source ?? '-' }}</td>
+                                                <td>{{ $item->campaign ?? '-' }}</td>
+                                                <td>{{ isset($item->datetime) ? \Carbon\Carbon::parse($item->datetime)->format('M d, Y h:i A') : '-' }}</td>
 
                                                 {{-- Status Badge --}}
                                                 <td>
@@ -559,11 +606,12 @@
                                                 </td>
 
                                                 <td>{{ $item->classification ?? '-' }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($item->remind_date)->format('d M Y') }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($item->remind_time)->format('h:i A') }}</td>
+                                                <td>{{ isset($item->remind_date) ? \Carbon\Carbon::parse($item->remind_date)->format('d M Y') : '-' }}</td>
+                                                <td>{{ isset($item->remind_time) ? \Carbon\Carbon::parse($item->remind_time)->format('h:i A') : '-' }}</td>
 
                                                 {{-- Comment --}}
                                                 <td>
+                                                    @if(!$isBaUser)
                                                     <div class="d-flex align-items-center">
                                                         <div class="flex-shrink-0 me-2">
                                                             <i class="fas fa-comment-alt text-muted"></i>
@@ -577,6 +625,10 @@
                                                             </a>
                                                         </div>
                                                     </div>
+                                                    @else
+                                                        <span class="blur-content">{{ $short }}</span>
+                                                        <i class="fas fa-lock restricted-icon" data-bs-toggle="tooltip" title="Comment hidden"></i>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -617,6 +669,10 @@
                                             $createdDate = \Carbon\Carbon::parse($item->created_at);
                                             $currentDate = \Carbon\Carbon::now();
                                             $diff_date_count = $createdDate->diffInDays($currentDate);
+                                            
+                                            $maskedName = $isBaUser ? '********' : $item->name;
+                                            $maskedPhone = $isBaUser ? '**********' : $item->phone;
+                                            $maskedEmail = $isBaUser ? '*****@*****.***' : ($item->email ?? '');
                                         @endphp
                                         <tr>
                                         <td>
@@ -624,6 +680,7 @@
                                                 <i class="{{ $icon }}"></i> {{ $type }}
                                             </span>
                                             <div class="d-flex gap-2 align-items-center">
+                                                @if(!$isBaUser)
                                                 <a href="tel:{{ $item->phone }}" class="btn btn-xs btn-soft-light" title="Call">
                                                     <i class="fas fa-phone text-primary"></i>
                                                 </a>
@@ -637,6 +694,7 @@
                                                     style="cursor:pointer;">
                                                     <i class="fas fa-thumbtack"></i>
                                                 </div>
+                                                @endif
                                                 <div class="position-relative d-inline-block text-center">
                                                     @if($diff_date_count > 5)
                                                     <span 
@@ -652,7 +710,7 @@
                                                         {{ $item->id }}
                                                     </span>
                                                 </div>
-                                                @if($item->is_pinned)
+                                                @if($item->is_pinned && !$isBaUser)
                                                     <span class="pinned-badge">Pinned</span>
                                                 @endif
                                                 
@@ -666,9 +724,21 @@
                                         
                                         <td>
                                             <div class="d-flex flex-column">
-                                                <h6 class="mb-0">{{ $item->name }}</h6>
-                                                <span class="text-muted small">{{ $item->phone }}</span>
+                                                <h6 class="mb-0 {{ $isBaUser ? 'restricted-access' : '' }}">
+                                                    {{ $maskedName }}
+                                                    @if($isBaUser)
+                                                        <i class="fas fa-lock restricted-icon" data-bs-toggle="tooltip" title="Contact information hidden"></i>
+                                                    @endif
+                                                </h6>
+                                                <span class="text-muted small {{ $isBaUser ? 'restricted-access' : '' }}">
+                                                    @if($isBaUser)
+                                                        <span class="blur-content">{{ $maskedPhone }}</span>
+                                                    @else
+                                                        {{ $maskedPhone }}
+                                                    @endif
+                                                </span>
                                             </div>
+                                            @if(!$isBaUser)
                                             <div class="d-flex">
                                                 <button class="btn btn-xs btn-soft-light" 
                                                     onclick="showStatusUpdateModal({{ $item->id }}, '{{ $item->status }}')"
@@ -679,12 +749,13 @@
                                                     <i class="fas fa-edit text-warning"></i>
                                                 </a>
                                             </div>
+                                            @endif
                                         </td>
 
-                                        <td>{{ $item->agent_name }}</td>
-                                        <td>{{ $item->source }}</td>
-                                        <td>{{ $item->campaign }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($item->datetime)->format('M d, Y h:i A') }}</td>
+                                        <td>{{ $item->agent_name ?? '-' }}</td>
+                                        <td>{{ $item->source ?? '-' }}</td>
+                                        <td>{{ $item->campaign ?? '-' }}</td>
+                                        <td>{{ isset($item->datetime) ? \Carbon\Carbon::parse($item->datetime)->format('M d, Y h:i A') : '-' }}</td>
 
                                         {{-- Status Badge --}}
                                         <td>
@@ -700,11 +771,12 @@
                                         </td>
 
                                         <td>{{ $item->classification ?? '-' }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($item->remind_date)->format('d M Y') }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($item->remind_time)->format('h:i A') }}</td>
+                                        <td>{{ isset($item->remind_date) ? \Carbon\Carbon::parse($item->remind_date)->format('d M Y') : '-' }}</td>
+                                        <td>{{ isset($item->remind_time) ? \Carbon\Carbon::parse($item->remind_time)->format('h:i A') : '-' }}</td>
 
                                         {{-- Comment --}}
                                         <td>
+                                            @if(!$isBaUser)
                                             <div class="d-flex align-items-center">
                                                 <div class="flex-shrink-0 me-2">
                                                     <i class="fas fa-comment-alt text-muted"></i>
@@ -718,6 +790,10 @@
                                                     </a>
                                                 </div>
                                             </div>
+                                            @else
+                                                <span class="blur-content">{{ $short }}</span>
+                                                <i class="fas fa-lock restricted-icon" data-bs-toggle="tooltip" title="Comment hidden"></i>
+                                            @endif
                                         </td>
                                     </tr>
                                     @endforeach

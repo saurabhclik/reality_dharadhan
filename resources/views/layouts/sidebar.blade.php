@@ -25,6 +25,7 @@
                     </a>
                 </li>
                 @endif
+                @if($userType != 'ba')
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-user"></i>
@@ -50,6 +51,7 @@
                         </li>
                     </ul>
                 </li>
+                @endif
 
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
